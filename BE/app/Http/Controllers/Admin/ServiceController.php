@@ -4,25 +4,31 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreServiceRequest;
+use App\Http\Requests\Admin\UpdateServiceRequest;
 use App\Http\Resources\ServiceResource;
 use App\Models\Service;
 use App\Traits\HasApiResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
-/**
- * Controller Admin untuk mengelola Layanan Laundry.
- */
 class ServiceController extends Controller
 {
     use HasApiResponse;
 
-    /**
-     * Menampilkan daftar semua layanan beserta kategori dan harga.
-     */
-    public function index()
+    // =========================================================================
+    // INDEX — tampilkan semua layanan
+    // =========================================================================
+    public function index(Request $request)
     {
-        // Mengambil semua service (layanan) beserta relasi category (kategori) dan prices (harga)
-        $services = Service::with(['category', 'prices'])->get();
+        $services = Service::with(['category', 'prices'])
+            // Filter by category_id kalau ada query param
+            // contoh: GET /api/admin/services?category_id=uuid
+            ->when(
+                $request->category_id,
+                fn($q) => $q->where('category_id', $request->category_id)
+            )
+            ->latest()
+            ->get();
 
         return $this->successResponse(
             ServiceResource::collection($services),
@@ -30,19 +36,17 @@ class ServiceController extends Controller
         );
     }
 
-    /**
-     * Menyimpan data layanan baru.
-     */
+    // =========================================================================
+    // STORE — buat layanan baru
+    // =========================================================================
     public function store(StoreServiceRequest $request)
     {
         $data = $request->validated();
 
-        $service = Service::create([
-            'name'        => $data['name'],
-            'category_id' => $data['category_id'],
-            'unit'        => $data['unit'] ?? null,
-            'is_active'   => $data['is_active'] ?? true,
-        ]);
+        // Generate slug otomatis dari name
+        $data['slug'] = $this->generateSlug($data['name']);
+
+        $service = Service::create($data);
 
         return $this->successResponse(
             new ServiceResource($service->load(['category', 'prices'])),
@@ -51,16 +55,14 @@ class ServiceController extends Controller
         );
     }
 
-    /**
-     * Menampilkan detail satu layanan.
-     */
-    public function show(string $id)
+    // =========================================================================
+    // SHOW — detail satu layanan
+    // Route Model Binding: Laravel otomatis cari Service by ID dari URL
+    // Kalau tidak ditemukan → otomatis 404, tidak perlu cek manual
+    // =========================================================================
+    public function show(Service $service)
     {
-        $service = Service::with(['category', 'prices'])->find($id);
-
-        if (!$service) {
-            return $this->errorResponse('Layanan tidak ditemukan', 404);
-        }
+        $service->load(['category', 'prices']);
 
         return $this->successResponse(
             new ServiceResource($service),
@@ -68,25 +70,17 @@ class ServiceController extends Controller
         );
     }
 
-    /**
-     * Memperbarui data layanan.
-     * Menggunakan tipe HTTP Method PUT/PATCH.
-     */
-    public function update(StoreServiceRequest $request, string $id)
+    // =========================================================================
+    // UPDATE — edit layanan
+    // =========================================================================
+    public function update(UpdateServiceRequest $request, Service $service)
     {
-        $service = Service::find($id);
-
-        if (!$service) {
-            return $this->errorResponse('Layanan tidak ditemukan', 404);
-        }
-
         $data = $request->validated();
-        $service->update([
-            'name'        => $data['name'],
-            'category_id' => $data['category_id'],
-            'unit'        => $data['unit'] ?? null,
-            'is_active'   => $data['is_active'] ?? true,
-        ]);
+
+        // Regenerate slug dari nama baru, kecualikan ID dirinya sendiri
+        $data['slug'] = $this->generateSlug($data['name'], $service->id);
+
+        $service->update($data);
 
         return $this->successResponse(
             new ServiceResource($service->load(['category', 'prices'])),
@@ -94,23 +88,42 @@ class ServiceController extends Controller
         );
     }
 
-    /**
-     * Menghapus layanan (Hanya hapus jika tidak ada relasi penting yang restrict).
-     */
-    public function destroy(string $id)
+    // =========================================================================
+    // DESTROY — hapus layanan
+    // =========================================================================
+    public function destroy(Service $service)
     {
-        $service = Service::find($id);
-
-        if (!$service) {
-            return $this->errorResponse('Layanan tidak ditemukan', 404);
+        // Cek apakah service masih dipakai di order_items
+        if ($service->orderItems()->exists()) {
+            return $this->errorResponse(
+                'Layanan tidak dapat dihapus karena masih digunakan dalam pesanan',
+                422
+            );
         }
 
-        try {
-            $service->delete();
-            return $this->successResponse(null, 'Layanan berhasil dihapus');
-        } catch (\Exception $e) {
-            // Bisa jadi gagal karena constrain relation restrict
-            return $this->errorResponse('Layanan gagal dihapus, mungkin sedang digunakan', 400);
+        $service->delete();
+
+        return $this->successResponse(null, 'Layanan berhasil dihapus');
+    }
+
+    // =========================================================================
+    // PRIVATE — generate slug unik
+    // =========================================================================
+    private function generateSlug(string $name, ?string $exceptId = null): string
+    {
+        $slug = Str::slug($name);
+        $original = $slug;
+        $counter = 1;
+
+        while (
+            Service::where('slug', $slug)
+                   ->when($exceptId, fn($q) => $q->where('id', '!=', $exceptId))
+                   ->exists()
+        ) {
+            $slug = "{$original}-{$counter}";
+            $counter++;
         }
+
+        return $slug;
     }
 }

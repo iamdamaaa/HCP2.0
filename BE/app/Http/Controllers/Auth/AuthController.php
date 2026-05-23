@@ -108,7 +108,7 @@ class AuthController extends Controller
             'phone'       => $data['phone'],
             'email'       => $data['email'],
             'password'    => Hash::make($data['password']),
-            'role'        => 'pelanggan',
+            'role'        => 'user',
             'is_verified' => false, // bisa di-set true atau nunggu verifikasi OTP/Email
         ]);
 

@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('password')->nullable();
             $table->enum('role', ['user','mitra','employee','admin'])->default('user');
             $table->boolean('is_verified')->default(false);
-            $table->integer('poin')->default(0);
+            $table->integer('points')->default(0);
             $table->timestamps();
         });
 

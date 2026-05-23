@@ -1,0 +1,1092 @@
+{
+  "info": {
+    "_postman_id": "hcp-laundry-api-collection",
+    "name": "HCP Laundry API",
+    "description": "Postman Collection untuk HCP Laundry Backend API. Mencakup alur: Register, Login, Admin membuat Category & Service, User membuat Order, dan User membatalkan Order.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000/api",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string",
+      "description": "Diisi otomatis setelah Login berhasil via Test Script"
+    },
+    {
+      "key": "admin_token",
+      "value": "",
+      "type": "string",
+      "description": "Diisi manual setelah login sebagai admin"
+    },
+    {
+      "key": "order_id",
+      "value": "",
+      "type": "string",
+      "description": "Diisi otomatis setelah Create Order berhasil"
+    },
+    {
+      "key": "category_id",
+      "value": "",
+      "type": "string",
+      "description": "Diisi otomatis setelah Create Category berhasil"
+    },
+    {
+      "key": "service_id",
+      "value": "",
+      "type": "string",
+      "description": "Diisi otomatis setelah Create Service berhasil"
+    },
+    {
+      "key": "price_id",
+      "value": "",
+      "type": "string",
+      "description": "Diisi manual setelah mengetahui ID harga dari endpoint GET /services"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "description": "Alur autentikasi: Register dan Login user baru",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Budi Santoso\",\n  \"phone\": \"081234567890\",\n  \"email\": \"budi@example.com\",\n  \"password\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Mendaftar akun user baru. Fields: name (required), phone (required, unique), email (required, unique), password (required, min:6)."
+          },
+          "response": [
+            {
+              "name": "Register - Sukses 201",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Budi Santoso\",\n  \"phone\": \"081234567890\",\n  \"email\": \"budi@example.com\",\n  \"password\": \"password123\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/auth/register",
+                  "host": ["{{base_url}}"],
+                  "path": ["auth", "register"]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Registrasi berhasil\",\n  \"data\": {\n    \"token\": \"1|xKYzAbCdEfGhIjKlMnOpQrStUvWxYz1234567890\",\n    \"user\": {\n      \"id\": \"9c8b7a6f-5e4d-3c2b-1a0f-9e8d7c6b5a4f\",\n      \"name\": \"Budi Santoso\",\n      \"phone\": \"081234567890\",\n      \"email\": \"budi@example.com\",\n      \"role\": \"pelanggan\"\n    }\n  }\n}"
+            }
+          ],
+          "event": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.success && res.data && res.data.token) {",
+                  "    pm.collectionVariables.set(\"token\", res.data.token);",
+                  "    console.log(\"Token berhasil disimpan:\", res.data.token);",
+                  "} else {",
+                  "    console.error(\"Login gagal, token tidak tersimpan.\", res);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email_or_phone\": \"budi@example.com\",\n  \"password\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Login menggunakan email ATAU nomor telepon dan password. Token akan otomatis tersimpan ke collection variable `token` setelah login berhasil."
+          },
+          "response": [
+            {
+              "name": "Login - Sukses 200",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email_or_phone\": \"budi@example.com\",\n  \"password\": \"password123\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/auth/login",
+                  "host": ["{{base_url}}"],
+                  "path": ["auth", "login"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Login berhasil\",\n  \"data\": {\n    \"token\": \"2|xKYzAbCdEfGhIjKlMnOpQrStUvWxYz9876543210\",\n    \"user\": {\n      \"id\": \"9c8b7a6f-5e4d-3c2b-1a0f-9e8d7c6b5a4f\",\n      \"name\": \"Budi Santoso\",\n      \"phone\": \"081234567890\",\n      \"email\": \"budi@example.com\",\n      \"role\": \"pelanggan\"\n    }\n  }\n}"
+            },
+            {
+              "name": "Login - Gagal 401 (Kredensial Salah)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email_or_phone\": \"budi@example.com\",\n  \"password\": \"salah123\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/auth/login",
+                  "host": ["{{base_url}}"],
+                  "path": ["auth", "login"]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Kredensial tidak cocok\",\n  \"data\": null\n}"
+            }
+          ]
+        },
+        {
+          "name": "Login (Admin) ← simpan ke admin_token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.success && res.data && res.data.token) {",
+                  "    pm.collectionVariables.set(\"admin_token\", res.data.token);",
+                  "    console.log(\"Admin Token berhasil disimpan:\", res.data.token);",
+                  "} else {",
+                  "    console.error(\"Login admin gagal.\", res);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email_or_phone\": \"admin@hcp\",\n  \"password\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Login sebagai Admin. Token disimpan ke `admin_token`. Gunakan seeder admin@hcp / password123 (dari UserSeeder)."
+          },
+          "response": [
+            {
+              "name": "Login Admin - Sukses 200",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email_or_phone\": \"admin@hcp\",\n  \"password\": \"password123\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/auth/login",
+                  "host": ["{{base_url}}"],
+                  "path": ["auth", "login"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Login berhasil\",\n  \"data\": {\n    \"token\": \"3|adminTokenXxXxXxXxXxXxXxXxXxXxXxXx\",\n    \"user\": {\n      \"id\": \"1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d\",\n      \"name\": \"Admin HCP\",\n      \"phone\": \"08100000001\",\n      \"email\": \"admin@hcp\",\n      \"role\": \"admin\"\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{base_url}}/logout",
+              "host": ["{{base_url}}"],
+              "path": ["logout"]
+            },
+            "description": "Logout user yang sedang login, menghapus token aktif."
+          },
+          "response": [
+            {
+              "name": "Logout - Sukses 200",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/logout",
+                  "host": ["{{base_url}}"],
+                  "path": ["logout"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Logout berhasil\",\n  \"data\": null\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Category",
+      "description": "Admin membuat dan mengelola kategori layanan. Membutuhkan token Admin.",
+      "item": [
+        {
+          "name": "Create Category",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.success && res.data && res.data.id) {",
+                  "    pm.collectionVariables.set(\"category_id\", res.data.id);",
+                  "    console.log(\"Category ID disimpan:\", res.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "description": "Gunakan token Admin"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Shoes\",\n  \"slug\": \"shoes\",\n  \"description\": \"Category for shoe cleaning services\",\n  \"active\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/categories",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "categories"]
+            },
+            "description": "Admin membuat kategori baru. Membutuhkan role: admin. Category ID akan otomatis tersimpan ke variable `category_id`."
+          },
+          "response": [
+            {
+              "name": "Create Category - Sukses 201",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Shoes\",\n  \"slug\": \"shoes\",\n  \"description\": \"Category for shoe cleaning services\",\n  \"active\": true\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/admin/categories",
+                  "host": ["{{base_url}}"],
+                  "path": ["admin", "categories"]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Kategori berhasil ditambahkan\",\n  \"data\": {\n    \"id\": \"aa1bb2cc-3dd4-5ee6-ff78-9a0bb1cc2dd3\",\n    \"name\": \"Shoes\",\n    \"slug\": \"shoes\",\n    \"description\": \"Category for shoe cleaning services\",\n    \"active\": true,\n    \"created_at\": \"2026-05-23T10:00:00.000000Z\",\n    \"updated_at\": \"2026-05-23T10:00:00.000000Z\"\n  }\n}"
+            },
+            {
+              "name": "Create Category - Gagal 403 (Bukan Admin)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Shoes\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/admin/categories",
+                  "host": ["{{base_url}}"],
+                  "path": ["admin", "categories"]
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Akses ditolak, Anda tidak memiliki izin.\",\n  \"data\": null\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get All Categories",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/categories",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "categories"]
+            },
+            "description": "Mengambil semua kategori. Membutuhkan role: admin."
+          },
+          "response": [
+            {
+              "name": "Get All Categories - Sukses 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }],
+                "url": {
+                  "raw": "{{base_url}}/admin/categories",
+                  "host": ["{{base_url}}"],
+                  "path": ["admin", "categories"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Data berhasil diambil\",\n  \"data\": [\n    {\n      \"id\": \"aa1bb2cc-3dd4-5ee6-ff78-9a0bb1cc2dd3\",\n      \"name\": \"Shoes\",\n      \"slug\": \"shoes\",\n      \"description\": \"Category for shoe cleaning services\",\n      \"active\": true\n    },\n    {\n      \"id\": \"bb2cc3dd-4ee5-6ff7-8a9b-0c1dd2ee3ff4\",\n      \"name\": \"Clothes\",\n      \"slug\": \"clothes\",\n      \"description\": \"Category for clothes cleaning services\",\n      \"active\": true\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Service",
+      "description": "Admin membuat dan mengelola layanan laundry. Membutuhkan token Admin.",
+      "item": [
+        {
+          "name": "Create Service",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.success && res.data && res.data.id) {",
+                  "    pm.collectionVariables.set(\"service_id\", res.data.id);",
+                  "    console.log(\"Service ID disimpan:\", res.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "description": "Gunakan token Admin"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"White Shoes Cleaning\",\n  \"category_id\": \"{{category_id}}\",\n  \"unit\": \"pair\",\n  \"is_active\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/services",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "services"]
+            },
+            "description": "Admin membuat layanan baru. Fields: name (required), category_id (required, uuid exists:categories), unit (required, max:50), is_active (boolean). Membutuhkan role: admin."
+          },
+          "response": [
+            {
+              "name": "Create Service - Sukses 201",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"White Shoes Cleaning\",\n  \"category_id\": \"aa1bb2cc-3dd4-5ee6-ff78-9a0bb1cc2dd3\",\n  \"unit\": \"pair\",\n  \"is_active\": true\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/admin/services",
+                  "host": ["{{base_url}}"],
+                  "path": ["admin", "services"]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Layanan berhasil ditambahkan\",\n  \"data\": {\n    \"id\": \"cc3dd4ee-5ff6-7a8b-9c0d-1e2f3a4b5c6d\",\n    \"name\": \"White Shoes Cleaning\",\n    \"unit\": \"pair\",\n    \"is_active\": true,\n    \"category\": {\n      \"id\": \"aa1bb2cc-3dd4-5ee6-ff78-9a0bb1cc2dd3\",\n      \"name\": \"Shoes\"\n    },\n    \"prices\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get All Services (Public)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/services",
+              "host": ["{{base_url}}"],
+              "path": ["services"]
+            },
+            "description": "Endpoint publik untuk mengambil semua layanan beserta kategori dan harga. Tidak membutuhkan autentikasi."
+          },
+          "response": [
+            {
+              "name": "Get All Services - Sukses 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/services",
+                  "host": ["{{base_url}}"],
+                  "path": ["services"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Data layanan berhasil diambil\",\n  \"data\": [\n    {\n      \"id\": \"cc3dd4ee-5ff6-7a8b-9c0d-1e2f3a4b5c6d\",\n      \"name\": \"White Shoes Cleaning\",\n      \"unit\": \"pair\",\n      \"is_active\": true,\n      \"category\": {\n        \"id\": \"aa1bb2cc-3dd4-5ee6-ff78-9a0bb1cc2dd3\",\n        \"name\": \"Shoes\"\n      },\n      \"prices\": [\n        {\n          \"id\": \"dd4ee5ff-6a7b-8c9d-0e1f-2a3b4c5d6e7f\",\n          \"duration\": \"1_day\",\n          \"price\": 35000,\n          \"is_active\": true\n        },\n        {\n          \"id\": \"ee5ff6a7-8b9c-0d1e-2f3a-4b5c6d7e8f9a\",\n          \"duration\": \"2_days\",\n          \"price\": 28000,\n          \"is_active\": true\n        }\n      ]\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update Service",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"White Shoes Cleaning (Updated)\",\n  \"category_id\": \"{{category_id}}\",\n  \"unit\": \"pair\",\n  \"is_active\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/services/{{service_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "services", "{{service_id}}"]
+            },
+            "description": "Admin mengupdate data layanan yang sudah ada."
+          },
+          "response": [
+            {
+              "name": "Update Service - Sukses 200",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"White Shoes Cleaning (Updated)\",\n  \"category_id\": \"aa1bb2cc-3dd4-5ee6-ff78-9a0bb1cc2dd3\",\n  \"unit\": \"pair\",\n  \"is_active\": false\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/admin/services/cc3dd4ee-5ff6-7a8b-9c0d-1e2f3a4b5c6d",
+                  "host": ["{{base_url}}"],
+                  "path": ["admin", "services", "cc3dd4ee-5ff6-7a8b-9c0d-1e2f3a4b5c6d"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Layanan berhasil diperbarui\",\n  \"data\": {\n    \"id\": \"cc3dd4ee-5ff6-7a8b-9c0d-1e2f3a4b5c6d\",\n    \"name\": \"White Shoes Cleaning (Updated)\",\n    \"unit\": \"pair\",\n    \"is_active\": false,\n    \"category\": {\n      \"id\": \"aa1bb2cc-3dd4-5ee6-ff78-9a0bb1cc2dd3\",\n      \"name\": \"Shoes\"\n    },\n    \"prices\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete Service",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/services/{{service_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "services", "{{service_id}}"]
+            },
+            "description": "Admin menghapus layanan. Akan gagal jika layanan masih memiliki relasi yang di-restrict (misal: order aktif)."
+          },
+          "response": [
+            {
+              "name": "Delete Service - Sukses 200",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }],
+                "url": {
+                  "raw": "{{base_url}}/admin/services/cc3dd4ee-5ff6-7a8b-9c0d-1e2f3a4b5c6d",
+                  "host": ["{{base_url}}"],
+                  "path": ["admin", "services", "cc3dd4ee-5ff6-7a8b-9c0d-1e2f3a4b5c6d"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Layanan berhasil dihapus\",\n  \"data\": null\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Order",
+      "description": "User (Customer) membuat, melihat, dan membatalkan pesanan laundry.",
+      "item": [
+        {
+          "name": "Create Order",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.success && res.data && res.data.id) {",
+                  "    pm.collectionVariables.set(\"order_id\", res.data.id);",
+                  "    console.log(\"Order ID disimpan:\", res.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "description": "Token user (customer) yang sudah login"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"service_id\": \"{{service_id}}\",\n  \"price_id\": \"{{price_id}}\",\n  \"channel\": \"website\",\n  \"same_location\": false,\n  \"pickup_address\": \"Jl. Contoh No. 123, Bandung\",\n  \"delivery_address\": \"Jl. Contoh No. 123, Bandung\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/orders",
+              "host": ["{{base_url}}"],
+              "path": ["orders"]
+            },
+            "description": "User membuat pesanan baru. Fields: service_id (uuid, exists:services), price_id (uuid, exists:prices), channel (in:website,whatsapp,mitra), same_location (boolean), pickup_address (required jika same_location=false), delivery_address (required jika same_location=false). Order ID akan otomatis tersimpan ke `order_id`."
+          },
+          "response": [
+            {
+              "name": "Create Order - Sukses 201",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"service_id\": \"cc3dd4ee-5ff6-7a8b-9c0d-1e2f3a4b5c6d\",\n  \"price_id\": \"dd4ee5ff-6a7b-8c9d-0e1f-2a3b4c5d6e7f\",\n  \"channel\": \"website\",\n  \"same_location\": false,\n  \"pickup_address\": \"Jl. Contoh No. 123, Bandung\",\n  \"delivery_address\": \"Jl. Tujuan No. 456, Bandung\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/orders",
+                  "host": ["{{base_url}}"],
+                  "path": ["orders"]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Pesanan berhasil dibuat\",\n  \"data\": {\n    \"id\": \"ff6a7b8c-9d0e-1f2a-3b4c-5d6e7f8a9b0c\",\n    \"order_number\": \"ORD-AB12CD34\",\n    \"status\": \"waiting\",\n    \"channel\": \"website\",\n    \"total_price\": 35000,\n    \"discount\": 0,\n    \"final_price\": 35000,\n    \"created_at\": \"2026-05-23T10:30:00.000000Z\",\n    \"user\": {\n      \"id\": \"9c8b7a6f-5e4d-3c2b-1a0f-9e8d7c6b5a4f\",\n      \"name\": \"Budi Santoso\",\n      \"phone\": \"081234567890\"\n    },\n    \"items\": [\n      {\n        \"id\": \"a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d\",\n        \"service_id\": \"cc3dd4ee-5ff6-7a8b-9c0d-1e2f3a4b5c6d\",\n        \"price_id\": \"dd4ee5ff-6a7b-8c9d-0e1f-2a3b4c5d6e7f\",\n        \"qty\": 1,\n        \"subtotal\": 35000\n      }\n    ]\n  }\n}"
+            },
+            {
+              "name": "Create Order - Gagal 400 (Harga Tidak Valid)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"service_id\": \"cc3dd4ee-5ff6-7a8b-9c0d-1e2f3a4b5c6d\",\n  \"price_id\": \"price-yang-tidak-ada\",\n  \"channel\": \"website\",\n  \"same_location\": true\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/orders",
+                  "host": ["{{base_url}}"],
+                  "path": ["orders"]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Harga/Layanan tidak valid\",\n  \"data\": null\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get My Orders",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/orders",
+              "host": ["{{base_url}}"],
+              "path": ["orders"]
+            },
+            "description": "Mengambil semua pesanan milik user yang sedang login."
+          },
+          "response": [
+            {
+              "name": "Get My Orders - Sukses 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": {
+                  "raw": "{{base_url}}/orders",
+                  "host": ["{{base_url}}"],
+                  "path": ["orders"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Daftar pesanan berhasil diambil\",\n  \"data\": [\n    {\n      \"id\": \"ff6a7b8c-9d0e-1f2a-3b4c-5d6e7f8a9b0c\",\n      \"order_number\": \"ORD-AB12CD34\",\n      \"status\": \"waiting\",\n      \"channel\": \"website\",\n      \"total_price\": 35000,\n      \"discount\": 0,\n      \"final_price\": 35000,\n      \"created_at\": \"2026-05-23T10:30:00.000000Z\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Order Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/orders/{{order_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["orders", "{{order_id}}"]
+            },
+            "description": "Mengambil detail satu pesanan berdasarkan ID. Hanya bisa melihat pesanan milik sendiri."
+          },
+          "response": [
+            {
+              "name": "Get Order Detail - Sukses 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": {
+                  "raw": "{{base_url}}/orders/ff6a7b8c-9d0e-1f2a-3b4c-5d6e7f8a9b0c",
+                  "host": ["{{base_url}}"],
+                  "path": ["orders", "ff6a7b8c-9d0e-1f2a-3b4c-5d6e7f8a9b0c"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Detail pesanan berhasil diambil\",\n  \"data\": {\n    \"id\": \"ff6a7b8c-9d0e-1f2a-3b4c-5d6e7f8a9b0c\",\n    \"order_number\": \"ORD-AB12CD34\",\n    \"status\": \"waiting\",\n    \"channel\": \"website\",\n    \"total_price\": 35000,\n    \"discount\": 0,\n    \"final_price\": 35000,\n    \"created_at\": \"2026-05-23T10:30:00.000000Z\",\n    \"user\": {\n      \"id\": \"9c8b7a6f-5e4d-3c2b-1a0f-9e8d7c6b5a4f\",\n      \"name\": \"Budi Santoso\",\n      \"phone\": \"081234567890\"\n    },\n    \"items\": [\n      {\n        \"id\": \"a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d\",\n        \"qty\": 1,\n        \"subtotal\": 35000\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Cancel Order",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "description": "Token user (customer) pemilik order"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{base_url}}/orders/{{order_id}}/cancel",
+              "host": ["{{base_url}}"],
+              "path": ["orders", "{{order_id}}", "cancel"]
+            },
+            "description": "User membatalkan pesanannya sendiri. Hanya bisa dilakukan jika pesanan masih berstatus 'waiting'. Ini adalah endpoint pengganti DELETE (soft cancel)."
+          },
+          "response": [
+            {
+              "name": "Cancel Order - Sukses 200",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": {
+                  "raw": "{{base_url}}/orders/ff6a7b8c-9d0e-1f2a-3b4c-5d6e7f8a9b0c/cancel",
+                  "host": ["{{base_url}}"],
+                  "path": ["orders", "ff6a7b8c-9d0e-1f2a-3b4c-5d6e7f8a9b0c", "cancel"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Pesanan berhasil dibatalkan\",\n  \"data\": {\n    \"id\": \"ff6a7b8c-9d0e-1f2a-3b4c-5d6e7f8a9b0c\",\n    \"order_number\": \"ORD-AB12CD34\",\n    \"status\": \"cancel\",\n    \"channel\": \"website\",\n    \"total_price\": 35000,\n    \"discount\": 0,\n    \"final_price\": 35000,\n    \"created_at\": \"2026-05-23T10:30:00.000000Z\"\n  }\n}"
+            },
+            {
+              "name": "Cancel Order - Gagal 400 (Sudah Tidak Bisa Dibatalkan)",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": {
+                  "raw": "{{base_url}}/orders/ff6a7b8c-9d0e-1f2a-3b4c-5d6e7f8a9b0c/cancel",
+                  "host": ["{{base_url}}"],
+                  "path": ["orders", "ff6a7b8c-9d0e-1f2a-3b4c-5d6e7f8a9b0c", "cancel"]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Pesanan sudah tidak bisa dibatalkan karena statusnya: process\",\n  \"data\": null\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Employee",
+      "description": "Karyawan melihat dan mengupdate status pesanan yang di-assign kepadanya.",
+      "item": [
+        {
+          "name": "Get My Assigned Orders",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "description": "Token karyawan yang sudah login"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/employee/orders",
+              "host": ["{{base_url}}"],
+              "path": ["employee", "orders"]
+            },
+            "description": "Karyawan melihat daftar pesanan yang di-assign kepadanya. Membutuhkan role: employee."
+          },
+          "response": [
+            {
+              "name": "Get Assigned Orders - Sukses 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": {
+                  "raw": "{{base_url}}/employee/orders",
+                  "host": ["{{base_url}}"],
+                  "path": ["employee", "orders"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Daftar pesanan karyawan berhasil diambil\",\n  \"data\": [\n    {\n      \"id\": \"ff6a7b8c-9d0e-1f2a-3b4c-5d6e7f8a9b0c\",\n      \"order_number\": \"ORD-AB12CD34\",\n      \"status\": \"pickUp\",\n      \"channel\": \"website\",\n      \"pickup_address\": \"Jl. Contoh No. 123, Bandung\",\n      \"delivery_address\": \"Jl. Tujuan No. 456, Bandung\",\n      \"user\": {\n        \"id\": \"9c8b7a6f-5e4d-3c2b-1a0f-9e8d7c6b5a4f\",\n        \"name\": \"Budi Santoso\",\n        \"phone\": \"081234567890\"\n      },\n      \"items\": []\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update Order Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "description": "Token karyawan yang sudah login"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"process\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/employee/orders/{{order_id}}/status",
+              "host": ["{{base_url}}"],
+              "path": ["employee", "orders", "{{order_id}}", "status"]
+            },
+            "description": "Karyawan mengupdate status pesanan. Values yang valid: pickUp, process, delivery, done. Membutuhkan role: employee."
+          },
+          "response": [
+            {
+              "name": "Update Status - Sukses 200",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"process\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/employee/orders/ff6a7b8c-9d0e-1f2a-3b4c-5d6e7f8a9b0c/status",
+                  "host": ["{{base_url}}"],
+                  "path": ["employee", "orders", "ff6a7b8c-9d0e-1f2a-3b4c-5d6e7f8a9b0c", "status"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Status pesanan berhasil diperbarui menjadi process\",\n  \"data\": {\n    \"id\": \"ff6a7b8c-9d0e-1f2a-3b4c-5d6e7f8a9b0c\",\n    \"order_number\": \"ORD-AB12CD34\",\n    \"status\": \"process\",\n    \"channel\": \"website\",\n    \"pickup_address\": \"Jl. Contoh No. 123, Bandung\",\n    \"delivery_address\": \"Jl. Tujuan No. 456, Bandung\",\n    \"user\": {\n      \"id\": \"9c8b7a6f-5e4d-3c2b-1a0f-9e8d7c6b5a4f\",\n      \"name\": \"Budi Santoso\",\n      \"phone\": \"081234567890\"\n    },\n    \"items\": []\n  }\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
