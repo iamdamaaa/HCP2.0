@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('poin_logs', function (Blueprint $table) {
+        Schema::create('point_logs', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignUuid('order_id')->nullable()->constrained('orders')->onDelete('set null');
-            $table->enum('tipe', ['plus', 'minus']);
-            $table->integer('poin');
+            $table->enum('type', ['plus', 'minus']);
+            $table->integer('points');
             $table->string('description')->nullable();
             $table->timestamps();
         });
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('poin_logs');
+        Schema::dropIfExists('point_logs');
     }
 };

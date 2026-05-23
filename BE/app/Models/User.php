@@ -33,7 +33,7 @@ class User extends Authenticatable
         'password',
         'role',
         'is_verified',
-        'poin',
+        'points',
     ];
 
     /**
@@ -51,7 +51,7 @@ class User extends Authenticatable
         return [
             'password'    => 'hashed',
             'is_verified' => 'boolean',
-            'poin'        => 'integer',
+            'points'        => 'integer',
         ];
     }
 
@@ -78,9 +78,9 @@ class User extends Authenticatable
     }
 
     /** Point history log */
-    public function poinLogs(): HasMany
+    public function pointLogs(): HasMany
     {
-        return $this->hasMany(PoinLog::class);
+        return $this->hasMany(PointLog::class);
     }
 
     /** Absence records */

@@ -16,6 +16,8 @@ return new class extends Migration
             $table->foreignUuid('category_id')->constrained('categories')->onDelete('restrict');
             $table->string('name')->unique();
             $table->string('slug')->unique();
+            $table->string('unit')->nullable();
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }

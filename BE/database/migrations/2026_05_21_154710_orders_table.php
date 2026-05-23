@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignUuid('partner_id')->nullable()->constrained('partners')->onDelete('set null');
             $table->foreignUuid('employee_id')->nullable()->constrained('users')->onDelete('set null');
             $table->foreignUuid('coupon_id')->nullable()->constrained('coupons')->onDelete('set null');
-            $table->string('no_orders')->unique();
+            $table->string('order_number')->unique();
             $table->enum('status', [
                 'waiting',
                 'pickUp',
@@ -34,11 +34,11 @@ return new class extends Migration
             $table->string('pickup_address')->nullable();
             $table->string('delivery_address')->nullable();
             $table->boolean('same_location')->default(false);
-            $table->integer('poin_digunakan')->default(0);
-            $table->integer('poin_didapat')->default(0);
-            $table->decimal('total_harga', 12, 2)->default(0);
-            $table->decimal('diskon', 12, 2)->default(0);
-            $table->decimal('harga_akhir', 12, 2)->default(0);
+            $table->integer('points_used')->default(0);
+            $table->integer('points_earned')->default(0);
+            $table->decimal('total_price', 12, 2)->default(0);
+            $table->decimal('discount', 12, 2)->default(0);
+            $table->decimal('final_price', 12, 2)->default(0);
             $table->timestamps();
         });
     }

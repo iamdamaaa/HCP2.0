@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('prices', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('service_id')->constrained('services')->onDelete('restrict');
-            $table->enum('tipe', ['4_jam', '8_jam', '12_jam', '1_hari', '2_hari', '3_hari']);
+            $table->enum('duration_type', ['4_hours', '8_hours', '12_hours', '1_day', '2_days', '3_days']);
             $table->decimal('price', 12, 2);
             $table->boolean('active')->default(true);
             $table->timestamps();

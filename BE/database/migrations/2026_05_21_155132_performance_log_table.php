@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignUuid('order_id')->nullable()->constrained('orders')->onDelete('set null');
             $table->decimal('rating', 3, 2)->nullable()->comment('Rating 0.00 - 5.00');
             $table->text('feedback')->nullable();
-            $table->enum('kategori', ['kebersihan', 'ketepatan_waktu', 'komunikasi', 'hasil_kerja'])->nullable();
+            $table->enum('category', ['cleanliness', 'timeliness', 'communication', 'work_quality'])->nullable();
             $table->timestamps();
         });
     }

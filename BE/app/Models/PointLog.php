@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class PoinLog extends Model
+class PointLog extends Model
 {
     use HasUuids;
 
@@ -16,7 +16,7 @@ class PoinLog extends Model
     /**
      * The table associated with the model.
      */
-    protected $table = 'poin_logs';
+    protected $table = 'point_logs';
 
     /**
      * The attributes that are mass assignable.
@@ -24,8 +24,8 @@ class PoinLog extends Model
     protected $fillable = [
         'user_id',
         'order_id',
-        'tipe',
-        'poin',
+        'type',
+        'points',
         'description',
     ];
 
@@ -33,7 +33,7 @@ class PoinLog extends Model
      * The attributes that should be cast.
      */
     protected $casts = [
-        'poin' => 'integer',
+        'points' => 'integer',
     ];
 
     // -------------------------------------------------------------------------
@@ -59,12 +59,12 @@ class PoinLog extends Model
     /** Only point additions */
     public function scopePlus($query)
     {
-        return $query->where('tipe', 'plus');
+        return $query->where('type', 'plus');
     }
 
     /** Only point deductions */
     public function scopeMinus($query)
     {
-        return $query->where('tipe', 'minus');
+        return $query->where('type', 'minus');
     }
 }

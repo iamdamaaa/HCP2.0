@@ -21,6 +21,8 @@ class Service extends Model
         'category_id',
         'name',
         'slug',
+        'unit',
+        'is_active',
     ];
 
     // -------------------------------------------------------------------------

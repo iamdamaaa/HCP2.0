@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('partners', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('user_id')->constrained('users')->onDelete('cascade');
-            $table->enum('tipe', ['toko', 'kos', 'affiliate']);
+            $table->enum('type', ['shop', 'boarding_house', 'affiliate']);
             $table->string('name');
             $table->string('address');
             $table->boolean('pick_up_delivery_same')->default(false);

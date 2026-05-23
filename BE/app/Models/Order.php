@@ -23,17 +23,17 @@ class Order extends Model
         'partner_id',
         'employee_id',
         'coupon_id',
-        'no_orders',
+        'order_number',
         'status',
         'channel',
         'pickup_address',
         'delivery_address',
         'same_location',
-        'poin_digunakan',
-        'poin_didapat',
-        'total_harga',
-        'diskon',
-        'harga_akhir',
+        'points_used',
+        'points_earned',
+        'total_price',
+        'discount',
+        'final_price',
     ];
 
     /**
@@ -41,11 +41,11 @@ class Order extends Model
      */
     protected $casts = [
         'same_location'  => 'boolean',
-        'poin_digunakan' => 'integer',
-        'poin_didapat'   => 'integer',
-        'total_harga'    => 'decimal:2',
-        'diskon'         => 'decimal:2',
-        'harga_akhir'    => 'decimal:2',
+        'points_used' => 'integer',
+        'points_earned'   => 'integer',
+        'total_price'    => 'decimal:2',
+        'discount'         => 'decimal:2',
+        'final_price'    => 'decimal:2',
     ];
 
     // -------------------------------------------------------------------------
@@ -95,9 +95,9 @@ class Order extends Model
     }
 
     /** Point logs created from this order */
-    public function poinLogs(): HasMany
+    public function pointLogs(): HasMany
     {
-        return $this->hasMany(PoinLog::class);
+        return $this->hasMany(PointLog::class);
     }
 
     /** Affiliate referral that led to this order */

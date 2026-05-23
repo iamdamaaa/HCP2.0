@@ -2,24 +2,25 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Database\Seeders\UserSeeder;
+use Database\Seeders\ServiceSeeder;
+use Database\Seeders\CategorySeeder;
+use Database\Seeders\PriceSeeder;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
     /**
      * Seed the application's database.
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        // Urutan wajib agar foreign key tidak error
+        $this->call([
+            UserSeeder::class,      // pertama, tidak ada FK
+            CategorySeeder::class,  // kedua
+            ServiceSeeder::class,   // ketiga, FK ke kategori
+            PriceSeeder::class,     // terakhir, FK ke layanan
         ]);
     }
 }

@@ -19,7 +19,7 @@ class Price extends Model
      */
     protected $fillable = [
         'service_id',
-        'tipe',
+        'duration_type',
         'price',
         'active',
     ];
