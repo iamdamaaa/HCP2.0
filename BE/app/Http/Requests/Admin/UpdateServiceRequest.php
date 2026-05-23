@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateServiceRequest extends FormRequest
 {
@@ -13,12 +14,12 @@ class UpdateServiceRequest extends FormRequest
 
     public function rules(): array
     {
-        // Ambil ID dari route untuk ignore dirinya sendiri saat cek unique
-        $id = $this->route('service');
+        // Ambil model dari route binding, lalu ignore record ini saat cek unique
+        $service = $this->route('service');
 
         return [
             'category_id' => ['required', 'uuid', 'exists:categories,id'],
-            'name'        => ['required', 'string', 'max:100', "unique:services,name,{$id},id"],
+            'name'        => ['required', 'string', 'max:100', Rule::unique('services', 'name')->ignoreModel($service)],
             'unit'        => ['required', 'string', 'max:50'],
             'is_active'   => ['nullable', 'boolean'],
         ];
